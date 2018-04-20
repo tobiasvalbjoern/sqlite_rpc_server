@@ -13,7 +13,7 @@
 #include <string>
 #include <iostream>
 #include <string.h>
-const char* data = "Callback function called";
+
 sqlite3 *db;
 int rc;
 char *sql;
@@ -26,11 +26,10 @@ struct fetch_t {
 
 fetch_t Fetch;
 
+/*
 //We want to print the content of the table. 
-
 static int callback(void *data, int argc, char **argv, char **azColName) {
     int i;
-    fprintf(stderr, "%s: ", (const char*) data);
 
     for (i = 0; i < argc; i++) {
         printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
@@ -39,8 +38,9 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     printf("\n");
     return 0;
 }
+*/
 
-static int callback2(void *data, int argc, char **argv, char **azColName) {
+static int callback(void *data, int argc, char **argv, char **azColName) {
     int i;
     fetch_t *Fetch = (fetch_t *) data;
 
@@ -49,8 +49,6 @@ static int callback2(void *data, int argc, char **argv, char **azColName) {
             Fetch->result = atof(argv[i]);
         }
     }
-
-    printf("\n");
     return 0;
 }
 
@@ -58,10 +56,10 @@ int sqlite_opendb() {
     rc = sqlite3_open("test.db", &db);
 
     if (rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        syslog(LOG_ERR, "Can't open database: %s",sqlite3_errmsg(db));
         exit(1);
     } else {
-        fprintf(stderr, "Opened database successfully\n");
+         syslog(LOG_INFO, "Opened database successfully);
     }
 
     // Create table SQL statement. The first column is an autoincrementing
@@ -72,15 +70,14 @@ int sqlite_opendb() {
          "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"\
          "TEMPERATURE    FLOAT     NOT NULL);";
 
-
     // Execute SQL statement
-    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error in CREATE TABLE: %s\n", zErrMsg);
+        syslog(LOG_ERR, "SQL error in CREATE TABLE: %s", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
-        fprintf(stdout, "Table created successfully\n");
+        syslog(LOG_INFO, "Table created successfully");
     }
 }
 
@@ -89,7 +86,6 @@ void sqlite_closedb() {
 }
 
 void sqlite_insert(float value) {
-
     
     char buffer[200];
     sprintf(buffer, "INSERT INTO TEMPERATURELOG (TEMPERATURE) VALUES (%.1f);", value);
@@ -97,13 +93,13 @@ void sqlite_insert(float value) {
     // Create INSERT statement
     sql = buffer;
     // Execute SQL statement 
-    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error in INSERT: %s\n", zErrMsg);
+        syslog(LOG_ERR, "SQL error in INSERT: %s", zErrMsg);
         sqlite3_free(zErrMsg);
     } else {
-        fprintf(stdout, "Records created successfully\n");
+        syslog(LOG_INFO, "Records created successfully");
     }
 }
 
@@ -112,15 +108,15 @@ float sqlite_getlatest() {
     sql = (char*) "SELECT * FROM TEMPERATURELOG ORDER BY TIMESTAMP DESC LIMIT 1;";
 
     // Execute SQL statement 
-    rc = sqlite3_exec(db, sql, callback2, &Fetch, &zErrMsg);
+    rc = sqlite3_exec(db, sql, callback, &Fetch, &zErrMsg);
 
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error in SELECT: %s\n", zErrMsg);
+        syslog(LOG_ERR, "SQL error in getlatest: %s", zErrMsg);
         sqlite3_free(zErrMsg);
-    } else {
-        fprintf(stdout, "Select Operation done successfully\n");
-    }
+    }else {
+        syslog(LOG_INFO, "Fetched information from DB correctly.");
+    } 
+    
     return Fetch.result;
-
 }
 
