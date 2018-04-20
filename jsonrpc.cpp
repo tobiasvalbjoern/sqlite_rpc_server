@@ -87,7 +87,6 @@ string jsonrpc_handler(string jsonrpc) {
         //cout << "Temp was requested" << endl;
         syslog(LOG_INFO, "Temp was requested\n");
         root["result"] = sqlite_getlatest();
-        //sqlite_getlatest();
     } 
     
     root.remove("method");

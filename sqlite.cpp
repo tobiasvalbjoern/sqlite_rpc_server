@@ -90,7 +90,7 @@ void sqlite_closedb() {
 
 void sqlite_insert(float value) {
 
-    sqlite_opendb();
+    
     char buffer[200];
     sprintf(buffer, "INSERT INTO TEMPERATURELOG (TEMPERATURE) VALUES (%.1f);", value);
     printf("Buffer: %s\n", buffer);
@@ -105,11 +105,9 @@ void sqlite_insert(float value) {
     } else {
         fprintf(stdout, "Records created successfully\n");
     }
-    sqlite_closedb();
 }
 
 float sqlite_getlatest() {
-
     // Create SELECT statement to fetch results latest results
     sql = (char*) "SELECT * FROM TEMPERATURELOG ORDER BY TIMESTAMP DESC LIMIT 1;";
 
@@ -122,7 +120,6 @@ float sqlite_getlatest() {
     } else {
         fprintf(stdout, "Select Operation done successfully\n");
     }
-
     return Fetch.result;
 
 }

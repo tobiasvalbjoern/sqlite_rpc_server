@@ -114,7 +114,7 @@ void tserver_init(const char * interface, const char *port, std::string(*handler
 
     //If the linked list has reached the end without binding.
     if (p == NULL) {
-        syslog(LOG_ERR, "Sockfd Could not associate with port");
+        syslog(LOG_ERR, "Sockfd Could not associate with port. Closing down");
         exit(1);
     }
 

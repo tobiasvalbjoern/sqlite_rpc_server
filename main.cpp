@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
+#include <syslog.h>
 
 #include "tserver.h"
 #include "jsonrpc.h"
@@ -21,9 +22,11 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     sqlite_opendb();  
+    //sqlite_insert(24);
     //Request - {"jsonrcp": "2.0", "method": "getTemp", "id": "1"} 
     tserver_init(INTERFACE, PORT, jsonrpc_handler); //Starts a new threaded server 
     while(1){
     sleep(1);
-    }  
+    }
+    sqlite_closedb();
 }
