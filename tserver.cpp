@@ -198,7 +198,7 @@ void * connection_handling(void * new_fd) {
     char buf_out[BUFSIZE];
     //No worries about strcpy, there are plenty of space
     //in the input buffer.
-    strcpy(buf_out, "CONNECTED!\n");
+    sprintf(buf_out, "CONNECTED with ID: %d", new_fd);
     send(fd, buf_out, strlen(buf_out), 0);
 
     while (!done) {

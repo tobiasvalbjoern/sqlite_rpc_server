@@ -89,6 +89,11 @@ string jsonrpc_handler(string jsonrpc) {
         root["result"] = sqlite_getlatest();
     } 
     
+    if(method == "setTemp"){
+         syslog(LOG_INFO, "Temp was requested\n");
+         sqlite_insert(params);
+    }
+    
     root.remove("method");
     root.remove("params");
     string output;

@@ -59,7 +59,7 @@ int sqlite_opendb() {
         syslog(LOG_ERR, "Can't open database: %s",sqlite3_errmsg(db));
         exit(1);
     } else {
-         syslog(LOG_INFO, "Opened database successfully);
+         syslog(LOG_INFO, "Opened database successfully");
     }
 
     // Create table SQL statement. The first column is an autoincrementing
@@ -89,7 +89,6 @@ void sqlite_insert(float value) {
     
     char buffer[200];
     sprintf(buffer, "INSERT INTO TEMPERATURELOG (TEMPERATURE) VALUES (%.1f);", value);
-    printf("Buffer: %s\n", buffer);
     // Create INSERT statement
     sql = buffer;
     // Execute SQL statement 
