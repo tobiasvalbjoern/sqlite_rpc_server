@@ -25,7 +25,7 @@ int jsonrpc_debug(char * jsonrpc) {
         return -1;
     }
 
-    if (jsonrpc_version != "2.0"  || !method.length() ) {
+    if (jsonrpc_version != "2.0" || !method.length()) {
         cout << "Not a valid JSONRPC object" << endl;
         return -1;
     }
@@ -44,13 +44,13 @@ int jsonrpc_debug(char * jsonrpc) {
     if (params.is<JsonArray>()) {
         cout << "Parameter Array" << endl;
         int i = 0;
-        for( const auto& kv : params.as<JsonObject>() ) {
+        for (const auto& kv : params.as<JsonObject>()) {
             cout << "[" << kv.key << "] " << kv.value.as<char*>() << endl;
         }
     }
     if (params.is<JsonObject>()) {
         cout << "Parameter Object" << endl;
-        for( const auto& kv : params.as<JsonObject>() ) {
+        for (const auto& kv : params.as<JsonObject>()) {
             cout << kv.key << " -> " << kv.value.as<char*>() << endl;
         }
     }
@@ -75,25 +75,28 @@ string jsonrpc_handler(string jsonrpc) {
         syslog(LOG_INFO, "Not a valid JSON object, -32700\n");
         return "{\"jsonrpc\": \"2.0\", \"error\": {\"code\": -32700, \"message\": \"Parse error\"}, \"id\": null}\n";
     }
-    
-    if (jsonrpc_version != "2.0" || !method.length() ) {
+
+    if (jsonrpc_version != "2.0" || !method.length()) {
         //cout << "Not a valid JSONRPC object" << endl;
         syslog(LOG_INFO, "Not a valid JSONRPC object, -32600\n");
         return "{\"jsonrpc\": \"2.0\", \"error\": {\"code\": -32600, \"message\": \"Invalid request\"}, \"id\": null}\n";
     }
-    
-    if(method == "getTemp") {
+
+    if (method == "getTemp") {
         //For debugging purposes.
         //cout << "Temp was requested" << endl;
         syslog(LOG_INFO, "Temp was requested\n");
         root["result"] = sqlite_getlatest();
-    } 
-    
-    if(method == "setTemp"){
-         syslog(LOG_INFO, "Setting temperature\n");
-         sqlite_insert(params);
+    } else if (method == "setTemp") {
+        syslog(LOG_INFO, "Setting temperature\n");
+        sqlite_insert(params);
+    }else{
+         return "{\"jsonrpc\": \"2.0\","
+                 " \"error\": {\"code\": -32601,"
+                 " \"message\": \"The method does not exist/is not available.\"},"
+                 " \"id\": null}\n";
     }
-    
+
     root.remove("method");
     root.remove("params");
     string output;

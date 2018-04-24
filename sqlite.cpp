@@ -13,7 +13,9 @@
 #include <string>
 #include <iostream>
 #include <string.h>
+#include <pthread.h>
 
+pthread_mutex_t lock;
 sqlite3 *db;
 int rc;
 char *sql;
@@ -70,9 +72,15 @@ int sqlite_opendb() {
          "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"\
          "TEMPERATURE    FLOAT     NOT NULL);";
 
+    //try to lock. Returns 0 when succesfulll
+    if (pthread_mutex_lock(&lock) == 0) {
     // Execute SQL statement
-    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
-
+    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);    
+    }
+    //the lock is only for adjusting the static value.
+    pthread_mutex_unlock(&lock);
+    
+    
     if (rc != SQLITE_OK) {
         syslog(LOG_ERR, "SQL error in CREATE TABLE: %s", zErrMsg);
         sqlite3_free(zErrMsg);
@@ -91,8 +99,15 @@ void sqlite_insert(float value) {
     sprintf(buffer, "INSERT INTO TEMPERATURELOG (TEMPERATURE) VALUES (%.1f);", value);
     // Create INSERT statement
     sql = buffer;
-    // Execute SQL statement 
-    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
+    
+    //try to lock. Returns 0 when succesfulll
+    if (pthread_mutex_lock(&lock) == 0) {
+    // Execute SQL statement
+    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);    
+    }
+    //the lock is only for adjusting the static value.
+    pthread_mutex_unlock(&lock);
+    
 
     if (rc != SQLITE_OK) {
         syslog(LOG_ERR, "SQL error in INSERT: %s", zErrMsg);
@@ -106,9 +121,15 @@ float sqlite_getlatest() {
     // Create SELECT statement to fetch results latest results
     sql = (char*) "SELECT * FROM TEMPERATURELOG ORDER BY TIMESTAMP DESC LIMIT 1;";
 
-    // Execute SQL statement 
-    rc = sqlite3_exec(db, sql, callback, &Fetch, &zErrMsg);
-
+    //try to lock. Returns 0 when succesfulll
+    if (pthread_mutex_lock(&lock) == 0) {
+    // Execute SQL statement
+    rc = sqlite3_exec(db, sql, callback, &Fetch, &zErrMsg);  
+    }
+    //the lock is only for adjusting the static value.
+    pthread_mutex_unlock(&lock);
+    
+    
     if (rc != SQLITE_OK) {
         syslog(LOG_ERR, "SQL error in getlatest: %s", zErrMsg);
         sqlite3_free(zErrMsg);

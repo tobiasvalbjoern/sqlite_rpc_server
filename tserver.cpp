@@ -45,7 +45,7 @@ enum state {
 
 //Stores the filedescriptors. listen on sock_fd
 int sockfd;
-std::string(*handle_callback)(std::string) ;
+std::string(*handle_callback)(std::string);
 
 void tserver_init(const char * interface, const char *port, std::string(*handler)(std::string)) {
 
@@ -182,7 +182,6 @@ void * listen_thread(void * p) {
             syslog(LOG_ERR, "Couldn't create thread: %d", rc);
             exit(1);
         }
-
         pthread_attr_destroy(&attr);
     }
 
@@ -195,17 +194,22 @@ void * connection_handling(void * new_fd) {
     intptr_t fd = (intptr_t) new_fd;
 
     char buf_out[BUFSIZE];
-    //No worries about strcpy, there are plenty of space
-    //in the input buffer.
-    sprintf(buf_out, "CONNECTED with ID: %d", new_fd);
-    send(fd, buf_out, strlen(buf_out), 0);
+
+    sprintf(buf_out, "CONNECTED!\n");
+    int n = send(fd, buf_out, strlen(buf_out), 0);
+
+    if (n < 0) {
+        syslog(LOG_ERR, "Could not write to socket");
+        //break out of the loop and test on the main while loop
+        done=Set;
+    }
 
     while (!done) {
         char buf_in[BUFSIZE];
 
         memset(buf_in, 0x00, strlen(buf_in));
 
-        int n = recv(fd, buf_in, sizeof (buf_in), 0);
+        n = recv(fd, buf_in, sizeof (buf_in), 0);
 
         if (n < 0) {
             syslog(LOG_ERR, "Could not read from socket");
@@ -228,11 +232,10 @@ void * connection_handling(void * new_fd) {
             //break out of the loop and test on the main while loop
             break;
         }
-     
+
         std::string input(buf_in);
         std::string output = handle_callback(input);
-        if(output.length() > 1)
-        {
+        if (output.length() > 1) {
             n = send(fd, output.c_str(), output.length(), 0);
             if (n < 0) {
                 syslog(LOG_ERR, "Could not write to socket");
@@ -241,7 +244,7 @@ void * connection_handling(void * new_fd) {
                 //break out of the loop and test on the main while loop
                 break;
             }
-             syslog(LOG_INFO, "Sent %d bytes: %s", n, output.c_str());
+            syslog(LOG_INFO, "Sent %d bytes: %s", n, output.c_str());
         }
     }
     close(fd);
