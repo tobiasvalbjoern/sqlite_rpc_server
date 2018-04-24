@@ -14,7 +14,7 @@
 #ifndef SQLITE_H
 #define SQLITE_H
 
-int sqlite_opendb();
+void sqlite_opendb();
 void sqlite_closedb();
 void sqlite_insert(float value);
 float sqlite_getlatest();

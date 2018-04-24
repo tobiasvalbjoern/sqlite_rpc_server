@@ -49,19 +49,18 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     for (i = 0; i < argc; i++) {
         if (strcmp(azColName[i], "TEMPERATURE") == 0) {
             Fetch->result = atof(argv[i]);
+            return(0);
         }
     }
     return 0;
 }
 
-int sqlite_opendb() {
+void sqlite_opendb() {
     rc = sqlite3_open("test.db", &db);
 
     if (rc) {
         syslog(LOG_ERR, "Can't open database: %s",sqlite3_errmsg(db));
         exit(1);
-    } else {
-         syslog(LOG_INFO, "Opened database successfully");
     }
 
     // Create table SQL statement. The first column is an autoincrementing
@@ -80,13 +79,10 @@ int sqlite_opendb() {
     //the lock is only for adjusting the static value.
     pthread_mutex_unlock(&lock);
     
-    
     if (rc != SQLITE_OK) {
         syslog(LOG_ERR, "SQL error in CREATE TABLE: %s", zErrMsg);
         sqlite3_free(zErrMsg);
-    } else {
-        syslog(LOG_INFO, "Table created successfully");
-    }
+    } 
 }
 
 void sqlite_closedb() {
@@ -112,9 +108,7 @@ void sqlite_insert(float value) {
     if (rc != SQLITE_OK) {
         syslog(LOG_ERR, "SQL error in INSERT: %s", zErrMsg);
         sqlite3_free(zErrMsg);
-    } else {
-        syslog(LOG_INFO, "Records created successfully");
-    }
+    } 
 }
 
 float sqlite_getlatest() {
@@ -133,10 +127,7 @@ float sqlite_getlatest() {
     if (rc != SQLITE_OK) {
         syslog(LOG_ERR, "SQL error in getlatest: %s", zErrMsg);
         sqlite3_free(zErrMsg);
-    }else {
-        syslog(LOG_INFO, "Fetched information from DB correctly.");
-    } 
-    
+    }
     return Fetch.result;
 }
 
