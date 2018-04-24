@@ -31,7 +31,6 @@
 
 #include <iostream>
 
-#include "stringtrim.h"
 // how many pending connections queue will hold
 #define BACKLOG 10
 #define BUFSIZE 1024
@@ -208,7 +207,6 @@ void * connection_handling(void * new_fd) {
 
         int n = recv(fd, buf_in, sizeof (buf_in), 0);
 
-
         if (n < 0) {
             syslog(LOG_ERR, "Could not read from socket");
             done = Set;
@@ -232,7 +230,6 @@ void * connection_handling(void * new_fd) {
         }
      
         std::string input(buf_in);
-        trim(input);
         std::string output = handle_callback(input);
         if(output.length() > 1)
         {

@@ -45,7 +45,7 @@ static int callback(void *data, int argc, char **argv, char **azColName) {
     fetch_t *Fetch = (fetch_t *) data;
 
     for (i = 0; i < argc; i++) {
-        if (strncmp(azColName[i], "TEMPERATURE",5) == 0) {
+        if (strcmp(azColName[i], "TEMPERATURE") == 0) {
             Fetch->result = atof(argv[i]);
         }
     }

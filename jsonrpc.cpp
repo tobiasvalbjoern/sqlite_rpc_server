@@ -90,7 +90,7 @@ string jsonrpc_handler(string jsonrpc) {
     } 
     
     if(method == "setTemp"){
-         syslog(LOG_INFO, "Temp was requested\n");
+         syslog(LOG_INFO, "Setting temperature\n");
          sqlite_insert(params);
     }
     
